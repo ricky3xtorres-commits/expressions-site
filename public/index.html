@@ -115,7 +115,7 @@ nav a:hover::after { transform: scaleX(1); }
 .hero > .wrap { position: relative; z-index: 2; }
 .hero-film { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: none; background: #000; }
 .hero.has-film .hero-film { display: block; }
-.hero-film video { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.8s ease; filter: contrast(1.08) saturate(.9) brightness(.82); }
+.hero-film video { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.8s ease; }
 .hero-film video.on { opacity: 1; animation: film-drift 14s ease-out both; }
 @keyframes film-drift { from { transform: scale(1.12) translate3d(1.5%, 0, 0); } to { transform: scale(1.02) translate3d(0, 0, 0); } }
 .hero-shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; display: none; }
@@ -129,6 +129,8 @@ nav a:hover::after { transform: scaleX(1); }
 .hero-shade::after { border-block: 0 solid #000; z-index: 3; animation: letterbox 2.4s cubic-bezier(.7,0,.2,1) .4s both; }
 @keyframes letterbox { from { border-width: 0; } to { border-width: clamp(18px, 5vh, 56px); } }
 @media (max-width: 820px) {
+  .hero-film video.on { animation: none; }
+  .grain-overlay { animation: none; }
   .hero-shade { background: linear-gradient(180deg, rgba(5,5,6,.25) 0%, rgba(5,5,6,.15) 28%, rgba(5,5,6,.75) 50%, rgba(5,5,6,.9) 80%, var(--stage) 100%); }
 }
 
@@ -613,10 +615,10 @@ document.querySelectorAll('.partner').forEach(function (t) {
 (function () {
   /* Each scene: wide clip, a still shown while it loads, and an optional tall clip for phones. */
   var SCENES = [
-    { src: 'assets/film/scene-1.mp4', poster: 'assets/film/scene-1.webp' }, /* the wasteland */
-    { src: 'assets/film/scene-2.mp4', poster: 'assets/film/scene-2.webp' }, /* neon city */
-    { src: 'assets/film/scene-3.mp4', poster: 'assets/film/scene-3.webp' }, /* the hologram */
-    { src: 'assets/film/scene-4.mp4', poster: 'assets/film/scene-4.webp' }  /* night drive */
+    { src: 'assets/film/scene-1.mp4', poster: 'assets/film/scene-1.webp', tall: 'assets/film/scene-1-tall.mp4' }, /* the wasteland */
+    { src: 'assets/film/scene-2.mp4', poster: 'assets/film/scene-2.webp', tall: 'assets/film/scene-2-tall.mp4' }, /* neon city */
+    { src: 'assets/film/scene-3.mp4', poster: 'assets/film/scene-3.webp', tall: 'assets/film/scene-3-tall.mp4' }, /* the hologram */
+    { src: 'assets/film/scene-4.mp4', poster: 'assets/film/scene-4.webp', tall: 'assets/film/scene-4-tall.mp4' }  /* night drive */
   ];
   var hero = document.querySelector('.hero'), box = document.getElementById('hero-film');
   if (!hero || !box || !SCENES.length) return;
@@ -639,8 +641,9 @@ document.querySelectorAll('.partner').forEach(function (t) {
     if (cur) { var old = cur; old.classList.remove('on'); setTimeout(function () { old.pause(); old.remove(); }, 2000); }
     cur = v;
     if (still || SCENES.length === 1) return;
-    i = (i + 1) % SCENES.length; next = make(SCENES[i]);
-    timer = setTimeout(show, Math.max(4000, Math.min(HOLD, ((v.duration || 9) - 1.8) * 1000)));
+    i = (i + 1) % SCENES.length;
+    var wait = Math.max(4000, Math.min(HOLD, ((v.duration || 9) - 1.8) * 1000));
+    timer = setTimeout(function () { next = make(SCENES[i]); timer = setTimeout(show, 2500); }, wait - 2500);
   }
   if (still) { next.classList.add('on'); cur = next; return; }
   show();
